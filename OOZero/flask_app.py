@@ -31,5 +31,19 @@ def logout():
     user_logout()
     return redirect(url_for('home'))
 
+@app.route('/events')
+def events():
+    '''Main events listing page.'''
+    # TODO
+    pass
+
+@app.route('/events/create', methods=['POST', 'GET'])
+def events_create():
+    '''Create new events'''
+    if request.method == 'POST':
+        # TODO
+        pass
+    return render_template('events_create.html', error=error)
+
 if __name__ == '__main__':
     app.run()
