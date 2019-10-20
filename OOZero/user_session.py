@@ -25,3 +25,7 @@ def user_logout():
     """Log the current user out"""
     if 'user' in session:
         del session['user']
+
+def user_current():
+    """Return the username of the current user or None if no user is logged in"""
+    return session['user'] if 'user' in session else None

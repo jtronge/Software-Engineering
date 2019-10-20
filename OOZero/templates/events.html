@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+{% block title %}Events{% endblock %}
+{% block content %}
+    <h1>Events</h1>
+    {% if events|length() > 0 %}
+        {% for event in events %}
+            <div class="card">
+                <div class="card-body">
+                    <h3>{{ event.name }}</h3>
+                    <em>{{ event.owner.username }}</em>
+                    <p class="card-text">{{ event.description }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <em>No events found.</em>
+    {% endif %}
+
+{% endblock %}
+

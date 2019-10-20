@@ -18,7 +18,7 @@ class Event(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=False, nullable=False)
     owner = db.relationship("User", backref=db.backref("user", uselist=False))
     name = db.Column(db.String(60), unique=False, nullable=False)
-    discrption = db.Column(db.Text, unique=False, nullable=True)
+    description = db.Column(db.Text, unique=False, nullable=True)
     timestamp = db.Column(db.DateTime, unique=False, nullable=False, default=datetime.datetime.utcnow)
     start_time = db.Column(db.DateTime, unique=False, nullable=True)
     end_time = db.Column(db.DateTime, unique=False, nullable=True)
