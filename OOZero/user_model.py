@@ -5,10 +5,6 @@ import OOZero.event_model as event
 import hashlib
 import secrets
 
-#TODO Add database URI to config/production and config/development config
-#TODO Add username/password or secret key to instant/config
-
-
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -22,6 +18,35 @@ class User(db.Model):
 
     def __repr__(self):
         return str(self.id) + ', ' + str(self.username) + ', ' + str(self.name) + ', ' + str(self.email)  + ', ' + str(self.password_hash)  + ', ' + str(self.salt) + "\n"
+
+class RememberUser(db.Model):
+    __tablename__="remember_user"
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=False, nullable=False)
+    user = db.relationship("User", backref=db.backref("user"), foreign_keys=[user_id], uselist=False)
+    timestamp = db.Column(db.DateTime, unique=False, nullable=False, default=datetime.datetime.utcnow)
+    cookie = db.Column(db.String(129), unique=False, nullable=False)
+
+def addRemember(user):
+    """For the given user generate an entry in the RememberUser table and return a cookie that can be used to log the user in
+
+    Args:
+        user (User | int): User by id or User object
+
+    Returns:
+        (str): 128 byte hex hash to be used as temporary authentication token
+    """
+    pass#Must make sure token is unique
+
+def checkRemember(cookie):
+    """For the given temporary authentication token find a matching entry that hasn't expired, if sucessful return the User
+
+    Args:
+        cookie (str): temporary authentication token from client cookie
+
+    Returns:
+        (User | None): The user or None if no valid entry is found
+    """
+    pass#Remove expired entries before serching
 
 def hashPassword(password, salt):
     """Generates hash from given salt and password

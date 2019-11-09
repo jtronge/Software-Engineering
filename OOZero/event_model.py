@@ -22,6 +22,14 @@ class EventType(enum.Enum):
     REMINDER = 3,
     ENCRYPTED = 4
 
+class Page(db.Model):
+    __tablename__ = 'page'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=False, nullable=False)
+    owner = db.relationship("User", backref=db.backref("user"), foreign_keys=[owner_id], uselist=False)
+    name = db.Column(db.String(60), unique=False, nullable=False)
+    description = db.Column(db.Text, unique=False, nullable=True)
+
 class Event(db.Model):
     __tablename__ = 'event'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -36,9 +44,49 @@ class Event(db.Model):
     parent = db.relationship("Event", remote_side=[id], uselist=False)
     #children = db.relationship("Event", backref=db.backref("event", uselist=True), foreign_keys=[parent_id]) #TODO not working
     event_type = db.Column(db.Enum(EventType), unique=False, nullable=False)
+    position_x = db.Column(db.Integer, unique=False, nullable=True)
+    position_y = db.Column(db.Integer, unique=False, nullable=True)
+    page_id = db.Column(db.Integer, db.ForeignKey("page.id"), unique=False, nullable=True)
+    page = db.relationship("Page", backref=db.backref("page"), foreign_keys=[page_id], uselist=False)
 
     def __repr__(self):
         return str(self.id) + ', ' + str(self.name) + ', ' + str(self.owner_id) + ', ' + str(self.description)  + ', ' + str(self.timestamp)  + "\n" 
+
+def createPage(name, owner, description=None):
+    """Creates a page and returns it
+
+    Args:
+        name (str): 0 < length <= 60, title of page
+        owner (int | User): id of user or User who this event belongs to
+    Kwargs:
+        description (str, Optional): Extra text about the page
+
+    Returns:
+        (Page): newly created page
+    """
+    pass
+
+def deletePage(page, cascadeEvents=True, cascadePages=True):
+    """Deletes a page
+
+    Args:
+        page (int): id of page to delete
+        cascadeEvents (bool, Optional): delete all events belonging to this page, defaults to true
+        cascadePages (bool, Optional): : delete all sub pages belonging to this page, defaults to true
+
+    """
+    pass
+
+def editPage(page, name=None, discription=None):
+    """Edits a page
+
+    Args:
+        page (int | Page): id of page or Page to edit
+    Kwargs:
+        name (str, Optional): 0 < length <= 60, title of page
+        description (str, Optional): Extra text about the page
+    """
+    pass
 
 def generateKey(value):
     """Generates a 256 bit encryption key off of the given string
@@ -130,8 +178,10 @@ def createEvent(name, owner, event_type, description=None, start_time=None, end_
             raise TypeError("Encrypted notes must have a password")
     elif not password is None:
         raise TypeError("Only encrypted notes can have a password")
-    if type(owner) != int:
-        raise TypeError("Owner id must be an int")
+    if type(owner) == user.User:
+        owner = owner.id
+    elif type(owner) != int:
+        raise TypeError("Owner must be a user id or a User")
 
     if event_type == EventType.ENCRYPTED:
         description = encrypt(description, password)
