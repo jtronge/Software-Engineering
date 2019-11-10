@@ -26,7 +26,7 @@ class Page(db.Model):
     __tablename__ = 'page'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=False, nullable=False)
-    owner = db.relationship("User", backref=db.backref("user"), foreign_keys=[owner_id], uselist=False)
+    owner = db.relationship("User", foreign_keys=[owner_id], backref=db.backref("pages", uselist=True), uselist=False)
     name = db.Column(db.String(60), unique=False, nullable=False)
     description = db.Column(db.Text, unique=False, nullable=True)
 
@@ -34,20 +34,19 @@ class Event(db.Model):
     __tablename__ = 'event'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=False, nullable=False)
-    owner = db.relationship("User", backref=db.backref("user"), foreign_keys=[owner_id], uselist=False)
+    owner = db.relationship("User", foreign_keys=[owner_id], backref=db.backref("events", uselist=True), uselist=False)
     name = db.Column(db.String(60), unique=False, nullable=False)
     description = db.Column(db.Text, unique=False, nullable=True)
     timestamp = db.Column(db.DateTime, unique=False, nullable=False, default=datetime.datetime.utcnow)
     start_time = db.Column(db.DateTime, unique=False, nullable=True)
     end_time = db.Column(db.DateTime, unique=False, nullable=True)
     parent_id = db.Column(db.Integer, db.ForeignKey("event.id"), unique=False, nullable=True)
-    parent = db.relationship("Event", remote_side=[id], uselist=False)
-    #children = db.relationship("Event", backref=db.backref("event", uselist=True), foreign_keys=[parent_id]) #TODO not working
+    parent = db.relationship("Event", remote_side=[id], backref=db.backref("children", uselist=True), uselist=False)
     event_type = db.Column(db.Enum(EventType), unique=False, nullable=False)
     position_x = db.Column(db.Integer, unique=False, nullable=True)
     position_y = db.Column(db.Integer, unique=False, nullable=True)
     page_id = db.Column(db.Integer, db.ForeignKey("page.id"), unique=False, nullable=True)
-    page = db.relationship("Page", backref=db.backref("page"), foreign_keys=[page_id], uselist=False)
+    page = db.relationship("Page", backref=db.backref("events", uselist=True), foreign_keys=[page_id], uselist=False)
 
     def __repr__(self):
         return str(self.id) + ', ' + str(self.name) + ', ' + str(self.owner_id) + ', ' + str(self.description)  + ', ' + str(self.timestamp)  + "\n" 
@@ -66,14 +65,12 @@ def createPage(name, owner, description=None):
     """
     pass
 
-def deletePage(page, cascadeEvents=True, cascadePages=True):
+def deletePage(page, cascadeEvents=True):
     """Deletes a page
 
     Args:
         page (int): id of page to delete
         cascadeEvents (bool, Optional): delete all events belonging to this page, defaults to true
-        cascadePages (bool, Optional): : delete all sub pages belonging to this page, defaults to true
-
     """
     pass
 
@@ -85,6 +82,17 @@ def editPage(page, name=None, discription=None):
     Kwargs:
         name (str, Optional): 0 < length <= 60, title of page
         description (str, Optional): Extra text about the page
+    """
+    pass
+
+def getPageEvents(page):
+    """Get all of the events belonging to a page
+
+    Args:
+        page (int | Page): id of page or Page to get events of
+
+    Returns:
+        list of events
     """
     pass
 
@@ -147,8 +155,6 @@ def checkEventAttributes(event):
         raise ValueError("Reminder types have a start time and no end times")
     elif event.event_type == EventType.EVENT and (event.start_time is None or event.end_time is None):
         raise ValueError("Event types have start and end times")
-    if (not event.start_time is None) and (not event.end_time is None):
-        pass
 
     return True
 
@@ -223,13 +229,33 @@ def getEventByOwner(owner):
         owner = owner.id
     return Event.query.filter_by(owner_id=owner).all()
 
-def editEvent(event, name=None, owner=None, description=None, start_time=None, end_time=None, password=None):
+def editEvent(event, name=None, owner=None, event_type=None, description=None, start_time=None, end_time=None, password=None):
+    """Modifies an event, and returns it
+
+    Args:
+        event (int | Event): id of event or Event object to modify
+
+    Kwargs:
+        name (str, Optional): 0 < length <= 60, title of event, is not encrypted for encrypted notes
+        owner (int, Optional): id of user who this event belongs to
+        event_type (EventType, Optional): type of this event, refer to EventType for more infomation
+        description (str, Optional): Extra text about the event, is encrypted and required for encrypted notes
+        start_time (datetime, Optional): Start time of event, only used in some EventTypes
+        end_time (datetime, Optional): End time of event, only used in some EventTypes
+        parent (int, Optional): id of event this is a child of if any
+        password (str, Optional): Used only on enrypted EventType, required in this case. Used to encrypt discription
+
+    Returns:
+        (Event): the newly modifed event
+    """
     if type(event) is int:
         event = getEventById(event)
     if not name is None:
         event.name = name
     if not owner is None:
         event.owner_id = owner
+    if not event_type is None:
+        event.event_type = event_type
     if not start_time is None:
         event.start_time = start_time
     if not end_time is None:
@@ -242,7 +268,11 @@ def editEvent(event, name=None, owner=None, description=None, start_time=None, e
         else:
             event.description = description
 
-    checkEventAttributes(event)
-    db.session.commit()
+    try:
+        checkEventAttributes(event)
+        db.session.commit()
+    except ValueError as e:
+        db.session.rollback()
+        raise e
     return getEventById(event.id)
     

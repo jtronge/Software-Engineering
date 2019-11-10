@@ -71,7 +71,6 @@ class TestUser(TestCase, unittest.TestCase):
         self.assertEqual(event1.description, "A very cool hat")
         event2 = event.createEvent("Best hat", 1, event.EventType.NOTE, parent=1)
         self.assertEqual(event2.parent, event.Event.query.filter_by(id=1).first())
-        self.assertRaises(TypeError, lambda: event.createEvent("Best hat", user.getUser(1), event.EventType.NOTE))
 
     def test_createEventRanges(self):
         self.assertRaises(ValueError, lambda: event.createEvent(None, 1, event.EventType.NOTE))
