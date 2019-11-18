@@ -111,6 +111,5 @@ class TestUser(TestCase, unittest.TestCase):
         user1new = user.getUser(user1.id)
         self.assertEqual(user1.username, user1new.username) #Test rollback
 
-
 if __name__ == '__main__':
     unittest.main()

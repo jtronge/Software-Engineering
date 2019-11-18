@@ -5,6 +5,10 @@ import OOZero.event_model as event
 import hashlib
 import secrets
 import datetime
+import struct
+
+#Expiration of the remember user cookie
+MAX_LENGTH_DAYS = 30
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -35,7 +39,18 @@ def addRemember(user):
     Returns:
         (str): 128 byte hex hash to be used as temporary authentication token
     """
-    pass#Must make sure token is unique
+    if type(user) == User:
+        user = user.id
+    hashFunct = hashlib.sha3_512()
+    token = None
+    while True:
+        hashFunct.update(struct.pack("d", secrets.SystemRandom().random()))
+        token = hashFunct.hexdigest()
+        if RememberUser.query.filter_by(cookie=token).first() == None:
+            break
+    db.session.add(RememberUser(user_id=user, cookie=token))
+    db.session.commit()
+    return token
 
 def checkRemember(cookie):
     """For the given temporary authentication token find a matching entry that hasn't expired, if sucessful return the User
@@ -46,7 +61,15 @@ def checkRemember(cookie):
     Returns:
         (User | None): The user or None if no valid entry is found
     """
-    pass#Remove expired entries before serching
+    oldEntries = RememberUser.query.filter(RememberUser.timestamp < datetime.datetime.utcnow() - datetime.timedelta(days=MAX_LENGTH_DAYS)).all()
+    for entry in oldEntries:
+        db.session.delete(entry)
+        db.session.commit()
+    entry = RememberUser.query.filter_by(cookie=cookie).first()
+    if entry is None:
+        return None
+    else:
+        return entry.user
 
 def hashPassword(password, salt):
     """Generates hash from given salt and password

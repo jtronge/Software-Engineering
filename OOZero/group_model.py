@@ -1,11 +1,7 @@
 from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from OOZero.model import db
-import OOZero.event_model as event
 import OOZero.user_model as user
-import hashlib
-import secrets
-import datetime
 
 class Group(db.Model):
     __tablename__ = 'group'
@@ -24,11 +20,3 @@ class UserInGroup(db.Model):
     user = db.relationship("User", foreign_keys=[user_id], backref=db.backref("groups", uselist=True), uselist=False)
     write = db.Column(db.Boolean, unique=False, nullable=False)
     admin = db.Column(db.Boolean, unique=False, nullable=False)
-
-class SharedEvent(db.Model):
-    __tablename__ = "shared_event"
-    event_id = db.Column(db.Integer, db.ForeignKey("event.id"), primary_key=True, unique=False)
-    event = db.relationship("Event", foreign_keys=[event_id], backref=db.backref("shared_events", uselist=True), uselist=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), primary_key=True, unique=False)
-    user = db.relationship("User", foreign_keys=[user_id], backref=db.backref("shared_events", uselist=True), uselist=False)
-    write = db.Column(db.Boolean, unique=False, nullable=False)

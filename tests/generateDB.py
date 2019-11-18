@@ -3,6 +3,8 @@ from OOZero import create_app
 from OOZero.model import db
 import OOZero.user_model as user
 import OOZero.event_model as event
+import OOZero.group_model as group
+import OOZero.shared_event_model as sharedEvent
 import datetime
 import argparse
 
