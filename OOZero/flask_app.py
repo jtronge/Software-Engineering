@@ -2,8 +2,11 @@ from OOZero import create_app
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from OOZero.user_model import authenticateUser, addUser, hashPassword, getUser
 from OOZero.user_session import login_required, user_login, user_logout
+from OOZero.event_blueprint import events
 
 app = create_app()
+app.register_blueprint(events, url_prefix='/events')
+
 
 @app.route('/')
 #@login_required

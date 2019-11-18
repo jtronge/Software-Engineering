@@ -17,9 +17,9 @@ class EventType(enum.Enum):
     REMINDER: Has only start time, is an instantaneous event
     ENCRYPTED: Like note, has no times. Discripion is encrypted with a password seperate from the user's password
     """
-    NOTE = 1,
-    EVENT = 2,
-    REMINDER = 3,
+    NOTE = 1
+    EVENT = 2
+    REMINDER = 3
     ENCRYPTED = 4
 
 class Page(db.Model):
@@ -352,4 +352,9 @@ def removeEventFromPage(event):
     event.page_id = None
     db.session.commit()
     return getEventById(event.id)
-    
+
+def getAllEvents():
+    """Returns a list of all events
+    """
+    return Event.query.all()
+

@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+{% block title %}Events{% endblock %}
+{% block content %}
+    <h1>Events</h1>
+    <form action="{{ url_for('events.index') }}" method="get" class="form-row">
+        <div class="col-md-4 mb-2">
+            <label for="q">Search</label>
+            <input id="q" name="q" type="text" class="form-control">
+        </div>
+        <div class="col-md-2 d-flex align-items-end mb-2">
+            <input type="submit" value="Filter" class="btn btn-primary btn-block">
+        </div>
+        <div class="offset-md-4 col-md-2 d-flex align-items-end mb-2">
+            <a href="{{ url_for('events.create') }}" class="btn btn-primary btn-block">Create</a>
+        </div>
+    </form>
+    {% if events|length() > 0 %}
+        {% for event in events %}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <h3>{{ event.name }}</h3>
+                    <em>{{ event.owner.username }}</em>
+                    <p class="card-text">{{ event.description }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p><em>No events found.</em></p>
+    {% endif %}
+
+{% endblock %}
+
