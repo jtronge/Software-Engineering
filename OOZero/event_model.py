@@ -43,10 +43,10 @@ class Event(db.Model):
     parent_id = db.Column(db.Integer, db.ForeignKey("event.id"), unique=False, nullable=True)
     parent = db.relationship("Event", remote_side=[id], backref=db.backref("children", uselist=True), uselist=False)
     event_type = db.Column(db.Enum(EventType), unique=False, nullable=False)
-    position_x = db.Column(db.Integer, unique=False, nullable=True)
-    position_y = db.Column(db.Integer, unique=False, nullable=True)
     page_id = db.Column(db.Integer, db.ForeignKey("page.id"), unique=False, nullable=True)
     page = db.relationship("Page", backref=db.backref("events", uselist=True), foreign_keys=[page_id], uselist=False)
+    position_x = db.Column(db.Integer, unique=False, nullable=True)
+    position_y = db.Column(db.Integer, unique=False, nullable=True)
 
     def __repr__(self):
         return str(self.id) + ', ' + str(self.name) + ', ' + str(self.owner_id) + ', ' + str(self.description)  + ', ' + str(self.timestamp)  + "\n" 
@@ -63,27 +63,76 @@ def createPage(name, owner, description=None):
     Returns:
         (Page): newly created page
     """
-    pass
+    if len(name) <= 0 or len(name) > 60:
+        raise ValueError("Events page name of ilegal length")
+    if type(owner) == user.User:
+        owner = owner.id
+    db.session.add(Page(name=name, owner_id=owner, description=description))
+    db.session.commit()
+    return Page.query.filter_by(name=name, owner_id=owner, description=description).first()
+
+def getPageById(page):
+    """Gets a page by id
+
+    Args:
+        page (int): page id
+
+    Returns:
+        (Page | None): the page or None if the page doesn't exist
+    """
+    return Page.query.filter_by(id=page).first()
+
+def getPagesByOwner(owner):
+    """Gets a list of pages by owner
+
+    Args:
+        owner (User | Int): owner User object or id
+
+    Returns:
+        ([Page]): the pages
+    """
+    if type(owner) == int:
+        owner = user.getUser(owner)
+    return owner.pages
 
 def deletePage(page, cascadeEvents=True):
     """Deletes a page
 
     Args:
-        page (int): id of page to delete
+        page (Page | int): Page object or id of page to delete
         cascadeEvents (bool, Optional): delete all events belonging to this page, defaults to true
     """
-    pass
+    if type(page) == int:
+        page = getPageById(page)
+    if cascadeEvents:
+        for event in page.events:
+            removeEvent(event)
+    db.session.delete(page)
+    db.session.commit()
 
-def editPage(page, name=None, discription=None):
+def editPage(page, owner=None, name=None, discription=None):
     """Edits a page
 
     Args:
         page (int | Page): id of page or Page to edit
     Kwargs:
         name (str, Optional): 0 < length <= 60, title of page
+        owner (User | int, Optional): new owner
         description (str, Optional): Extra text about the page
     """
-    pass
+    if type(page) == int:
+        page = getPageById(page)
+    if not name is None:
+        page.name = name
+    if not owner is None:
+        if type(owner) == user.User:
+            owner = owner.id
+        page.owner_id = owner
+    if not discription is None:
+        page.discription = discription
+    db.session.commit()
+    return getPageById(page.id)
+    
 
 def getPageEvents(page):
     """Get all of the events belonging to a page
@@ -94,7 +143,9 @@ def getPageEvents(page):
     Returns:
         list of events
     """
-    pass
+    if type(page) == int:
+        page = getPageById(page)
+    return page.events
 
 def generateKey(value):
     """Generates a 256 bit encryption key off of the given string
@@ -158,7 +209,7 @@ def checkEventAttributes(event):
 
     return True
 
-def createEvent(name, owner, event_type, description=None, start_time=None, end_time=None, parent=None, password=None):
+def createEvent(name, owner, event_type, description=None, start_time=None, end_time=None, parent=None, password=None, page=None, position_x=None, position_y=None):
     """Creates an event, addes it to the database, and returns it
 
     Args:
@@ -171,6 +222,9 @@ def createEvent(name, owner, event_type, description=None, start_time=None, end_
         end_time (datetime, Optional): End time of event, only used in some EventTypes
         parent (int, Optional): id of event this is a child of if any
         password (str): Used only on enrypted EventType, required in this case. Used to encrypt discription
+        page (Page | int, Optional): Page this event belongs to
+        position_x (int, Optional): used to determin where event is placed when displaying a Page
+        position_y (int, Optional): used to determin where event is placed when displaying a Page
 
     Returns:
         (Event): newly created event
@@ -188,15 +242,17 @@ def createEvent(name, owner, event_type, description=None, start_time=None, end_
         owner = owner.id
     elif type(owner) != int:
         raise TypeError("Owner must be a user id or a User")
+    if type(page) == Page:
+        page = page.id
 
     if event_type == EventType.ENCRYPTED:
         description = encrypt(description, password)
 
-    newEvent = Event(owner_id=owner, name=name, event_type=event_type, description=description, start_time=start_time, end_time=end_time, parent_id=parent)    
+    newEvent = Event(owner_id=owner, name=name, event_type=event_type, description=description, start_time=start_time, end_time=end_time, parent_id=parent, page_id=page, position_x=position_x, position_y=position_y)    
     if checkEventAttributes(newEvent):
         db.session.add(newEvent)
         db.session.commit()
-        return Event.query.filter_by(owner_id=owner, name=name, event_type=event_type, description=description, start_time=start_time, end_time=end_time, parent_id=parent).first()
+        return Event.query.filter_by(owner_id=owner, name=name, event_type=event_type, description=description, start_time=start_time, end_time=end_time, parent_id=parent, page_id=page, position_x=position_x, position_y=position_y).first()
 
 def removeEvent(event):
     """Removes event from database, if event doesn't exist don't do anything. Also delete child events
@@ -220,7 +276,7 @@ def getEventById(id):
     """
     return Event.query.filter_by(id=id).first()
 
-def getEventByOwner(owner):
+def getEventsByOwner(owner):
     """Get list of events by there owner
     Args:
         owner (int | User): User object or user id
@@ -229,7 +285,7 @@ def getEventByOwner(owner):
         owner = owner.id
     return Event.query.filter_by(owner_id=owner).all()
 
-def editEvent(event, name=None, owner=None, event_type=None, description=None, start_time=None, end_time=None, password=None):
+def editEvent(event, name=None, owner=None, event_type=None, description=None, start_time=None, end_time=None, password=None, page=None, position_x=None, position_y=None):
     """Modifies an event, and returns it
 
     Args:
@@ -260,6 +316,12 @@ def editEvent(event, name=None, owner=None, event_type=None, description=None, s
         event.start_time = start_time
     if not end_time is None:
         event.end_time = end_time
+    if not position_x is None:
+        event.position_x = position_x
+    if not position_y is None:
+        event.position_y = position_y
+    if not page is None:
+        event.page = page
     if not description is None:
         if event.event_type is EventType.ENCRYPTED:
             if password is None:
@@ -274,5 +336,20 @@ def editEvent(event, name=None, owner=None, event_type=None, description=None, s
     except ValueError as e:
         db.session.rollback()
         raise e
+    return getEventById(event.id)
+
+def removeEventFromPage(event):
+    """Removes an event from the page its on if any
+
+    Args:
+        event (int | Event): id of event or Event object to remove from its page
+
+    Returns:
+        (Event): the newly modifed event
+    """
+    if type(event) == int:
+        event = Event.query.filter_by(id=event).first()
+    event.page_id = None
+    db.session.commit()
     return getEventById(event.id)
     

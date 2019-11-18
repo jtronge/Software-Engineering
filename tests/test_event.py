@@ -71,6 +71,10 @@ class TestUser(TestCase, unittest.TestCase):
         self.assertEqual(event1.description, "A very cool hat")
         event2 = event.createEvent("Best hat", 1, event.EventType.NOTE, parent=1)
         self.assertEqual(event2.parent, event.Event.query.filter_by(id=1).first())
+        page1 = event.createPage("test", 1)
+        event3 = event.createEvent("test event on page", 1, event.EventType.NOTE, page=page1)
+        self.assertEqual(event3.page, page1)
+
 
     def test_createEventRanges(self):
         self.assertRaises(ValueError, lambda: event.createEvent(None, 1, event.EventType.NOTE))
@@ -127,8 +131,8 @@ class TestUser(TestCase, unittest.TestCase):
 
     def test_findByUser(self):
         event0 = event.createEvent("quick Note", 2, event.EventType.NOTE)
-        self.assertEqual(len(event.getEventByOwner(2)), 1)
-        self.assertEqual(len(event.getEventByOwner(user.getUser(1))), 2)
+        self.assertEqual(len(event.getEventsByOwner(2)), 1)
+        self.assertEqual(len(event.getEventsByOwner(user.getUser(1))), 2)
 
     def test_edit(self):
         event0 = event.createEvent("quick Note", 2, event.EventType.NOTE)
@@ -140,6 +144,10 @@ class TestUser(TestCase, unittest.TestCase):
         self.assertRaises(TypeError, lambda: event.editEvent(event0, description="ahh"))
         event0 = event.editEvent(event0, description="ahh", password="hmmm")
         self.assertEqual("ahh", event.decrypt(event0.description, "hmmm"))
+        page1 = event.createPage("test", 1)
+        event3 = event.createEvent("test event on page", 1, event.EventType.NOTE)
+        event3 = event.editEvent(event3, page=page1)
+        self.assertEqual(event3.page, page1)
         
 
 if __name__ == '__main__':
