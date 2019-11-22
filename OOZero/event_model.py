@@ -196,8 +196,10 @@ def editEvent(event, name=None, owner=None, description=None, start_time=None, e
     db.session.commit()
     return getEventById(event.id)
 
-def getAllEvents():
+def getAllEvents(search):
     """Returns a list of all events
     """
-    return Event.query.all()
+    search = '%' + search + '%'
+    return Event.query.filter(Event.name.like(search)
+                              | Event.description.like(search)).all()
 

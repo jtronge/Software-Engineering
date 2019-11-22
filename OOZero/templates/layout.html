@@ -9,15 +9,15 @@
 
       {% block styles %}{% endblock %}
 
-      <link rel="stylesheet" href="static/home.css">
+      <link rel="stylesheet" href="{{ url_for('static', filename='static/home.css') }}">
       <link href="https://fonts.googleapis.com/css?family=Open+Sans|Oswald&display=swap" rel="stylesheet">
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
       <script src="https://code.jquery.com/jquery-3.4.1.js"
           integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
-      <script src="static/scripts/underscore.js"></script>
+      <script src="{{ url_for('static', filename='static/scripts/underscore.js') }}"></script>
       <link rel="icon"
       type="image/png"
-      href="static/Images/dataFav.png">
+      href="{{ url_for('static', filename='static/Images/dataFav.png') }}">
         <title>{% block title %}{% endblock %}</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
