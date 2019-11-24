@@ -3,6 +3,8 @@ from OOZero import create_app
 from OOZero.model import db
 import OOZero.user_model as user
 import OOZero.event_model as event
+import OOZero.group_model as group
+import OOZero.shared_event_model as sharedEvent
 import datetime
 import argparse
 
@@ -24,6 +26,12 @@ def generatePopulateDB():
     event.createEvent(name="Rocks", owner=user.getUser("Jeff").id, description="Granit, Bassalt, Quartz", event_type=event.EventType.NOTE)
     event.createEvent(name="Short party", owner=user.getUser("username").id, event_type=event.EventType.EVENT, start_time=datetime.datetime.now(), end_time=datetime.datetime.now() + datetime.timedelta(hours=3))
     event.createEvent(name="Secrets", owner=user.getUser("test").id, event_type=event.EventType.ENCRYPTED, password="sure", description="Some passwords, SSNs, creditcard numbers, and otherthings you shouldn't trust this app with")
+    event.createPage(name="test page", owner=user.getUser("test"), description="This is a test page")
+    event.createPage(name="test page 2", owner=user.getUser("test"))
+    event.createPage(name="Jeffs stuff", owner=user.getUser("Jeff"))
+    page1 =  event.createPage(name="more thigns", owner=user.getUser("username"))
+    event.createEvent(name="its on a page", owner=user.getUser("username").id, event_type=event.EventType.NOTE, page=page1)
+
 
 
 if __name__ == "__main__":
