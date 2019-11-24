@@ -8,7 +8,10 @@ events = Blueprint('events', __name__, template_folder='templates')
 @events.route('/')
 @login_required
 def index():
-    return render_template('events.html', events=getAllEvents(), username=current_username)
+    search = request.args.get('q')
+    search = search if search else ''
+    return render_template('events.html', events=getAllEvents(search=search),
+                           username=current_username, search=search)
 
 @events.route('/create', methods=['POST', 'GET'])
 @login_required

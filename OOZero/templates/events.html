@@ -5,7 +5,7 @@
     <form action="{{ url_for('events.index') }}" method="get" class="form-row">
         <div class="col-md-4 mb-2">
             <label for="q">Search</label>
-            <input id="q" name="q" type="text" class="form-control">
+            <input id="q" name="q" type="text" class="form-control" value="{{ search }}">
         </div>
         <div class="col-md-2 d-flex align-items-end mb-2">
             <input type="submit" value="Filter" class="btn btn-primary btn-block">
