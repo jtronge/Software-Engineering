@@ -20,6 +20,8 @@
                 <div class="card-body">
                     <h3>{{ event.name }}</h3>
                     <em>{{ event.owner.username }}</em>
+                    <p class="card-text">{{ "Start time: " + pyDatetimeToMoment(event.start_time) if event.event_type == EventType.EVENT or event.event_type == EventType.REMINDER else "" }}</p>
+                    <p class="card-text">{{ "End time: " + pyDatetimeToMoment(event.end_time) if event.event_type == EventType.EVENT else "" }}</p>
                     <p class="card-text">{{ event.description }}</p>
                 </div>
             </div>
