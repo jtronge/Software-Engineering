@@ -85,7 +85,7 @@ def manage_user():
         if error is None:
             user = editUser(user, username=username, password=newPassword, name=name, email=email)
             session['username'] = user.username
-    return render_template('manage_user.html', error=error, user=user)
+    return render_template('manage_user.html', error=error, user=user, username=user.username) #Redudent username is required for template to know user is logged in
 
 @app.route('/logout/', methods=['POST', 'GET'])
 def logout():
