@@ -5,7 +5,7 @@
     <form action="{{ url_for('events.index') }}" method="get" class="form-row">
         <div class="col-md-4 mb-2">
             <label for="q">Search</label>
-            <input id="q" name="q" type="text" class="form-control" value="{{ search }}">
+            <input id="q" name="q" type="text" class="form-control" value="{{ request.args['q'] }}">
         </div>
         <div class="col-md-2 d-flex align-items-end mb-2">
             <input type="submit" value="Filter" class="btn btn-primary btn-block">
@@ -20,6 +20,11 @@
                 <div class="card-body">
                     <h3>{{ event.name }}</h3>
                     <em>{{ event.owner.username }}</em>
+                    {% if event.event_type == EventType.EVENT %}
+                    <p>{{ event.start_time }} - {{ event.end_time }}</p>
+                    {% elif event.event_type == EventType.REMINDER %}
+                    <p>{{ event.start_time }}</p>
+                    {% endif %}
                     <p class="card-text">{{ event.description }}</p>
                 </div>
             </div>
