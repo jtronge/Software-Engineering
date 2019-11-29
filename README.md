@@ -35,7 +35,7 @@ Linux Bash:
     export FLASK_APP=flask_app
     export OOZERO_CONFIG=your_flask_dir/OOZero/config.cfg
 
-
+    python tests/generateDB.py
 
 flask run
 ```

@@ -209,7 +209,7 @@ def editUser(user, username=None, password=None, name=None, email=None, profile_
                 raise ValueError("Password too short")
             else:
                 user.salt = secrets.token_hex(64)
-                user.password = hashPassword(password, user.salt)
+                user.password_hash = hashPassword(password, user.salt)
         if not name is None:
             if len(name) > 60:
                 raise ValueError("Name too long")

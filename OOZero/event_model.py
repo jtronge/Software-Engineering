@@ -355,6 +355,9 @@ def removeEventFromPage(event):
 
 def getAllEvents(search):
     """Returns a list of all events
+
+    Args:
+        search (str, Optional): return events that contain this string in their name or discription
     """
     search = '%' + search + '%'
     return Event.query.filter(Event.name.like(search)
