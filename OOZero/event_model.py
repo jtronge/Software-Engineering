@@ -276,14 +276,20 @@ def getEventById(id):
     """
     return Event.query.filter_by(id=id).first()
 
-def getEventsByOwner(owner):
-    """Get list of events by there owner
+def getEventsByOwner(owner, search=None):
+    """Get list of events by their owner
     Args:
         owner (int | User): User object or user id
+        search (str): Search string to limit results
     """
     if type(owner) is user.User:
         owner = owner.id
-    return Event.query.filter_by(owner_id=owner).all()
+    events = Event.query.filter_by(owner_id=owner)
+    if search:
+        search = '%' + search + '%'
+        events = events.filter(Event.name.like(search)
+                               | Event.description.like(search))
+    return events.all()
 
 def editEvent(event, name=None, owner=None, event_type=None, description=None, start_time=None, end_time=None, password=None, page=None, position_x=None, position_y=None):
     """Modifies an event, and returns it
@@ -352,14 +358,3 @@ def removeEventFromPage(event):
     event.page_id = None
     db.session.commit()
     return getEventById(event.id)
-
-def getAllEvents(search):
-    """Returns a list of all events
-
-    Args:
-        search (str, Optional): return events that contain this string in their name or discription
-    """
-    search = '%' + search + '%'
-    return Event.query.filter(Event.name.like(search)
-                              | Event.description.like(search)).all()
-

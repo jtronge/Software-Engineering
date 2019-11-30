@@ -1,28 +1,35 @@
 {% extends "layout.html" %}
-{% block title %}Create Event{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
 {% endblock %}
 
 {% block content %}
-<form action="{{ url_for('events.create') }}" method="post" class="m-auto" style="width: 400px;">
-    <h1>Create Event</h1>
+<form action="{{ url_for('events.create_or_edit') }}" method="post" class="m-auto" style="width: 400px;">
+    {% if event %}
+        <input type="hidden" name="id" value="{{ event.id }}">
+    {% endif %}
+
+    <h1>{% block title %}{{ 'Edit' if event else 'Create' }} Event{% endblock %}</h1>
     <span class="text-danger">{{ error if error else ''}}</span>
     <div class="form-group">
         <label for="name">Name</label>
-        <input id="name" name="name" type="text" class="form-control">
+        <input id="name" name="name" type="text" class="form-control" value="{{ event.name if event else '' }}" required>
     </div>
     <div class="form-group">
         <label for="description">Description</label>
-        <textarea id="description" name="description" class="form-control"></textarea>
+        <textarea id="description" name="description" class="form-control" required>{{ event.description if event else '' }}</textarea>
     </div>
     <div id="startTimeDiv" class="form-group" style="display: none;">
         <label for="start_time">Start Time</label>
         <div class="input-group date">
             <input id="start_time" name="start_time" type="text" class="form-control">
         </div>
-        
+    </div>
+    <div id="endTimeDiv" class="form-group" style="display: none;">
+        <label for="end_time">End Time</label>
+        <input id="end_time" name="end_time" type="text" class="form-control"
+            value="{{ event.end_time.strftime('%m/%d/%Y') if event and event.event_type == EventType.EVENT else '' }}" required>
     </div>
     <div id="endTimeDiv" class="form-group" style="display: none;">
         <label for="end_time">End Time</label>
@@ -38,24 +45,23 @@
     </div>
     <div class="form-group">
         <label for="event_type">Event Type</label>
-        <select id="event_type" name="event_type" class="form-control">
+        <select id="event_type" name="event_type" class="form-control" required {{ 'readonly' if event else '' }}>
             <option value="">Select Event Type</option>
             {% for e in EventType %}
-            <option value="{{ e.value }}">{{ e.name }}</option>
+            <option value="{{ e.value }}" {{ 'selected' if event.event_type == e else '' }}>{{ e.name }}</option>
             {% endfor %}
         </select>
     </div>
     <div class="form-group">
-        <input type="submit" value="Create" class="btn btn-primary">
+        <input type="submit" value="{{ 'Save' if event else 'Create' }}" class="btn btn-primary">
     </div>
 </form>
 {% endblock %}
 
 {% block scripts %}
-<script
-     src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
-     integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
-     crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
+    integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM="
+    crossorigin="anonymous"></script>
 <script type="text/javascript">
     // Hide or show various divs based on EventType
     function hideOrShowDivs() {
@@ -79,11 +85,38 @@
             break;
         }
     }
-    window.onload = function() {
-        document.querySelector("#event_type").onchange = function() {
+    window.addEventListener("load", function() {
+        function validateEvent() {
             hideOrShowDivs();
+            startTime = document.querySelector("#start_time");
+            endTime = document.querySelector("#end_time");
+            eventType = document.querySelector("#event_type");
+            switch (eventType.value) {
+            case "{{ EventType.ENCRYPTED.value }}":
+            case "{{ EventType.NOTE.value }}":
+                if (startTime.hasAttribute("required")) {
+                    startTime.removeAttribute("required");
+                }
+                if (endTime.hasAttribute("required")) {
+                    endTime.removeAttribute("required");
+                }
+                break;
+            case "{{ EventType.EVENT.value }}":
+                startTime.setAttribute("required", "");
+                endTime.setAttribute("required", "");
+                break;
+            case "{{ EventType.REMINDER.value }}":
+                startTime.setAttribute("required", "")
+                if (endTime.hasAttribute("required")) {
+                    endTime.removeAttribute("required");
+                }
+                break;
+            }
         }
-    };
+        document.querySelector("#event_type").addEventListener("change", validateEvent);
+        // Call validateEvent() onload to ensure the proper required attributes are set
+        validateEvent();
+    });
     // Setup the datetime pickers
     $(function () {
         $("#start_time").datetimepicker({
