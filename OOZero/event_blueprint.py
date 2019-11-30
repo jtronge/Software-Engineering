@@ -3,7 +3,7 @@ import datetime
 
 from OOZero.user_model import getUser
 from OOZero.user_session import login_required, current_username
-from OOZero.event_model import getEventsByOwner, getEventById, createEvent, editEvent, removeEvent, EventType
+from OOZero.event_model import getEventsByOwner, getEventById, createEvent, editEvent, removeEvent, EventType, getAllEvents
 import datetime
 
 events = Blueprint('events', __name__, template_folder='templates')
@@ -25,7 +25,7 @@ def index():
     user = getUser(current_username())
     search = request.args.get('q')
     search = search if search else ''
-    return render_template('events.html', events=getAllEvents(search=search),
+    return render_template('events.html', events=getEventsByOwner(user, search=search),
                            username=current_username, search=search, EventType=EventType, pyDatetimeToMoment=pyDatetimeToMoment)
 
 @events.route('/create', methods=('POST', 'GET'))

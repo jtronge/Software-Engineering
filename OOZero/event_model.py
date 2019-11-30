@@ -358,3 +358,11 @@ def removeEventFromPage(event):
     event.page_id = None
     db.session.commit()
     return getEventById(event.id)
+
+def getAllEvents(search):
+    """Returns a list of all events
+    Args:
+        search (str, Optional): return events that contain this string in their name or discription
+    """
+    search = '%' + search + '%'
+    return Event.query.filter(Event.name.like(search) | Event.description.like(search)).all()
