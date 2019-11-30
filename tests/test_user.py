@@ -110,6 +110,8 @@ class TestUser(TestCase, unittest.TestCase):
         self.assertRaises(ValueError, lambda: user.editUser(user1, "Test2", "ah"))
         user1new = user.getUser(user1.id)
         self.assertEqual(user1.username, user1new.username) #Test rollback
+        user1new = user.editUser(user1, password="newPassword")
+        self.assertTrue(user.authenticateUser(user1new.username, "newPassword"))
 
 if __name__ == '__main__':
     unittest.main()

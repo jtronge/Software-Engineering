@@ -134,6 +134,11 @@ class TestUser(TestCase, unittest.TestCase):
         self.assertEqual(len(event.getEventsByOwner(2)), 1)
         self.assertEqual(len(event.getEventsByOwner(user.getUser(1))), 2)
 
+    def test_getAllEvents(self):
+        event0 = event.createEvent("a fe eafeafeajjjjjjjjiiiiiiiifeafeaf", 2, event.EventType.NOTE)
+        event1 = event.createEvent("ahhhh", 2, event.EventType.NOTE, description="fijeoijfeajjjfe;jseoi")
+        self.assertEqual(len(event.getAllEvents("feajjj")), 2)
+
     def test_edit(self):
         event0 = event.createEvent("quick Note", 2, event.EventType.NOTE)
         updatedEvent = event.editEvent(event0, name="new name")

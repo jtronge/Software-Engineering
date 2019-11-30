@@ -358,4 +358,3 @@ def removeEventFromPage(event):
     event.page_id = None
     db.session.commit()
     return getEventById(event.id)
-
