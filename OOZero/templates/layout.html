@@ -13,7 +13,7 @@
       <link href="https://fonts.googleapis.com/css?family=Open+Sans|Oswald&display=swap" rel="stylesheet">
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
       <script src="https://code.jquery.com/jquery-3.4.1.js"
-          integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script> -->
+          integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
       <link rel="icon"
       type="image/png"
       href="{{ url_for('static', filename='Images/dataFav.png') }}">
@@ -21,7 +21,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      <!-- Bootstrap CDN -->
+      <!--- Bootstrap CDN --->
       <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
@@ -42,24 +42,9 @@
 
         <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
           <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-            <!---<li class="nav-item active">
-              <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-            </li>--->
             {% if username %}
             <li class="nav-item active">
               <a class="nav-link" href="{{ url_for('events.index') }}">Events</a>
-            </li>
-            {% endif %}
-            {% if username %}
-            <li class="nav-item">
-              <a class="nav-link" href="/logout/">Logout</a>
-            </li>
-            {% else %}
-            <li class="nav-item">
-              <a class="nav-item nav-link" href="/signup/">Signup</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-item nav-link" href="/login/">Login</a>
             </li>
             {% endif %}
           </ul>
