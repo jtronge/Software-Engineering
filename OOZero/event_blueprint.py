@@ -1,9 +1,9 @@
-from flask import Blueprint, render_template, abort, request, redirect, url_for
+from flask import Blueprint, render_template, abort, request, redirect, url_for, jsonify
 import datetime
 
 from OOZero.user_model import getUser
 from OOZero.user_session import login_required, current_username
-from OOZero.event_model import getEventsByOwner, getEventById, createEvent, editEvent, removeEvent, EventType, getAllEvents
+from OOZero.event_model import decrypt, getEventsByOwner, getEventById, createEvent, editEvent, removeEvent, EventType, getAllEvents
 import datetime
 
 events = Blueprint('events', __name__, template_folder='templates')
@@ -72,3 +72,16 @@ def remove(id):
     """
     removeEvent(id)
     return redirect(url_for('events.index'))
+
+@events.route('decrypt/<int:id>', methods=('POST',))
+@login_required
+def decryptReq(id):
+    """Checks ownership and uses provided password to decrypt message
+    """
+    event = getEventById(id)
+    if not event is None and event.user.username == current_username() and not request.form['event_password'] is None:
+        description = decrypt(event.description, request.form['event_password'])
+        res = {}
+        res["sucess"] = not description is None
+        res["description"] = description
+        return jsonify(res)
