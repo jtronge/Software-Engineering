@@ -20,11 +20,13 @@ def user_login(user):
         user: Value returned by authenticateUser()
     """
     session['username'] = user.username
+    session["Passes"] = {}
 
 def user_logout():
     """Log the current user out"""
     if 'user' in session:
         del session['username']
+        del session["Passes"]
 
 def current_username():
     """Return the username of the user that is currently logged in. If no
