@@ -19,7 +19,7 @@
     <div class="form-group">
         <label for="description">Description</label>
         <textarea id="description" name="description" class="form-control">
-            {{ event.description if event else '' }}
+            {{ '' if not event else checkCachedEncrypted(event) if event.event_type == EventType.ENCRYPTED else event.description }}
         </textarea>
     </div>
     <div id="startTimeDiv" class="form-group" style="display: none;">
@@ -101,25 +101,25 @@
             startTime = document.querySelector("#start_time");
             endTime = document.querySelector("#end_time");
             eventType = document.querySelector("#event_type");
+            password = document.querySelector("#event_password");
+            description = document.querySelector("#description");
+            startTime.required = false;
+            endTime.required = false;
+            password.required = false;
+            description.required = false;
             switch (eventType.value) {
             case "{{ EventType.ENCRYPTED.value }}":
+                password.required = true;
+                description.required = true;
+                break;
             case "{{ EventType.NOTE.value }}":
-                if (startTime.hasAttribute("required")) {
-                    startTime.removeAttribute("required");
-                }
-                if (endTime.hasAttribute("required")) {
-                    endTime.removeAttribute("required");
-                }
                 break;
             case "{{ EventType.EVENT.value }}":
-                startTime.setAttribute("required", "");
-                endTime.setAttribute("required", "");
+                startTime.required = true;
+                endTime.required = true;
                 break;
             case "{{ EventType.REMINDER.value }}":
-                startTime.setAttribute("required", "")
-                if (endTime.hasAttribute("required")) {
-                    endTime.removeAttribute("required");
-                }
+                startTime.required = true;
                 break;
             }
         }
